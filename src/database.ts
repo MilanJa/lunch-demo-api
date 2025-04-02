@@ -67,5 +67,18 @@ export const insertDemoData = async (db: any) => {
     await db.run(`INSERT INTO sandwich_orders (sandwich_id, user_id, order_date) VALUES (?, ?, ?)`, [1, 1, '2025-04-01']);
     await db.run(`INSERT INTO sandwich_orders (sandwich_id, user_id, order_date) VALUES (?, ?, ?)`, [2, 2, '2025-04-02']);
   }
+
+  // Check if the vendors table is empty
+  const vendorCount = await db.get('SELECT COUNT(*) as count FROM vendors');
+  if (vendorCount.count === 0) {
+    const vendor1 = await db.run(`INSERT INTO vendors (name) VALUES (?)`, ["Jimmy's"]);
+    const vendor2 = await db.run(`INSERT INTO vendors (name) VALUES (?)`, ['Oude Ambacht']);
+
+    // Associate sandwiches with vendors
+    await db.run(`INSERT INTO vendor_sandwiches (vendor_id, sandwich_id) VALUES (?, ?)`, [vendor1.lastID, 1]);
+    await db.run(`INSERT INTO vendor_sandwiches (vendor_id, sandwich_id) VALUES (?, ?)`, [vendor1.lastID, 2]);
+    await db.run(`INSERT INTO vendor_sandwiches (vendor_id, sandwich_id) VALUES (?, ?)`, [vendor2.lastID, 3]);
+    await db.run(`INSERT INTO vendor_sandwiches (vendor_id, sandwich_id) VALUES (?, ?)`, [vendor2.lastID, 4]);
+  }
 };
 
