@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
-import { initializeDatabase } from './database';
+import { initializeDatabase, insertDemoData } from './database';
 
 dotenv.config();
 
@@ -13,9 +13,13 @@ app.use(express.json());
 let db: any;
 
 // Initialize the database
-initializeDatabase().then((database: any) => {
+initializeDatabase().then(async (database: any) => {
   db = database;
   console.log('Database initialized');
+
+  // Insert demo data if the database is empty
+  await insertDemoData(db);
+  console.log('Demo data inserted if the database was empty');
 });
 
 // Route to list all sandwich orders
