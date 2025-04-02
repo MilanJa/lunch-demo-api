@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 import { initializeDatabase, insertDemoData } from './database';
 
 dotenv.config();
@@ -22,7 +24,35 @@ initializeDatabase().then(async (database: any) => {
   console.log('Demo data inserted if the database was empty');
 });
 
-// Update the GET /orders route to include user and sandwich details
+/**
+ * @swagger
+ * /orders:
+ *   get:
+ *     summary: List all sandwich orders
+ *     responses:
+ *       200:
+ *         description: A list of sandwich orders
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   order_id:
+ *                     type: integer
+ *                   sandwich_name:
+ *                     type: string
+ *                   bread_type:
+ *                     type: string
+ *                   user_name:
+ *                     type: string
+ *                   user_email:
+ *                     type: string
+ *                   order_date:
+ *                     type: string
+ *                     format: date
+ */
 app.get('/orders', async (req: Request, res: Response) => {
   try {
     const orders = await db.all(`
@@ -43,7 +73,35 @@ app.get('/orders', async (req: Request, res: Response) => {
   }
 });
 
-// Update the POST /orders route to ensure it uses the new schema
+/**
+ * @swagger
+ * /orders:
+ *   post:
+ *     summary: Create a new sandwich order
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sandwich_id:
+ *                 type: integer
+ *               user_id:
+ *                 type: integer
+ *               order_date:
+ *                 type: string
+ *                 format: date
+ *             required:
+ *               - sandwich_id
+ *               - user_id
+ *               - order_date
+ *     responses:
+ *       201:
+ *         description: Order created successfully
+ *       400:
+ *         description: Invalid input
+ */
 app.post('/orders', (async (req: Request, res: Response) => {
   const { sandwich_id, user_id, order_date } = req.body;
 
@@ -69,7 +127,28 @@ app.post('/orders', (async (req: Request, res: Response) => {
 
 // Add routes for managing sandwiches
 
-// Route to list all sandwiches
+/**
+ * @swagger
+ * /sandwiches:
+ *   get:
+ *     summary: List all sandwiches
+ *     responses:
+ *       200:
+ *         description: A list of sandwiches
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   sandwich_name:
+ *                     type: string
+ *                   bread_type:
+ *                     type: string
+ */
 app.get('/sandwiches', async (req: Request, res: Response) => {
   try {
     const sandwiches = await db.all('SELECT * FROM sandwiches');
@@ -79,7 +158,31 @@ app.get('/sandwiches', async (req: Request, res: Response) => {
   }
 });
 
-// Fix the type error by ensuring the route handler is properly typed
+/**
+ * @swagger
+ * /sandwiches:
+ *   post:
+ *     summary: Add a new sandwich
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sandwich_name:
+ *                 type: string
+ *               bread_type:
+ *                 type: string
+ *             required:
+ *               - sandwich_name
+ *               - bread_type
+ *     responses:
+ *       201:
+ *         description: Sandwich added successfully
+ *       400:
+ *         description: Invalid input
+ */
 app.post('/sandwiches', (async (req: Request, res: Response) => {
   const { sandwich_name, bread_type } = req.body;
 
@@ -108,7 +211,33 @@ app.get('/vendors', async (req: Request, res: Response) => {
   }
 });
 
-// Fix the type error by explicitly casting the route handler to express.RequestHandler
+/**
+ * @swagger
+ * /vendors:
+ *   post:
+ *     summary: Add a new vendor
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               sandwich_ids:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *             required:
+ *               - name
+ *               - sandwich_ids
+ *     responses:
+ *       201:
+ *         description: Vendor added successfully
+ *       400:
+ *         description: Invalid input
+ */
 app.post('/vendors', (async (req: Request, res: Response) => {
   const { name, sandwich_ids } = req.body;
 
@@ -129,6 +258,36 @@ app.post('/vendors', (async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to add vendor' });
   }
 }) as express.RequestHandler);
+
+// Swagger definition
+const swaggerDefinition = {
+  openapi: '3.0.0',
+  info: {
+    title: 'Sandwich Orders API',
+    version: '1.0.0',
+    description: 'API documentation for the Sandwich Orders application',
+  },
+  servers: [
+    {
+      url: 'http://localhost:3000',
+      description: 'Development server',
+    },
+  ],
+};
+
+// Options for swagger-jsdoc
+const options = {
+  swaggerDefinition,
+  apis: ['./src/**/*.ts'], // Path to the API docs
+};
+
+// Initialize swagger-jsdoc
+const swaggerSpec = swaggerJsdoc(options);
+
+// Serve Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+console.log('Swagger UI available at http://localhost:3000/api-docs');
 
 // Start the server
 app.listen(port, () => {
