@@ -26,9 +26,23 @@ initializeDatabase().then(async (database: any) => {
 
 /**
  * @swagger
+ * tags:
+ *   - name: Orders
+ *     description: Endpoints related to sandwich orders
+ *   - name: Sandwiches
+ *     description: Endpoints related to sandwiches
+ *   - name: Vendors
+ *     description: Endpoints related to vendors
+ */
+
+/**
+ * @swagger
  * /orders:
  *   get:
+ *     tags:
+ *       - Orders
  *     summary: List all sandwich orders
+ *     description: Retrieve a list of all sandwich orders, including details about the sandwich, user, and order date.
  *     responses:
  *       200:
  *         description: A list of sandwich orders
@@ -41,17 +55,23 @@ initializeDatabase().then(async (database: any) => {
  *                 properties:
  *                   order_id:
  *                     type: integer
+ *                     example: 1
  *                   sandwich_name:
  *                     type: string
+ *                     example: "Turkey Club"
  *                   bread_type:
  *                     type: string
+ *                     example: "Whole Wheat"
  *                   user_name:
  *                     type: string
+ *                     example: "John Doe"
  *                   user_email:
  *                     type: string
+ *                     example: "john.doe@example.com"
  *                   order_date:
  *                     type: string
  *                     format: date
+ *                     example: "2025-04-01"
  */
 app.get('/orders', async (req: Request, res: Response) => {
   try {
@@ -77,7 +97,10 @@ app.get('/orders', async (req: Request, res: Response) => {
  * @swagger
  * /orders:
  *   post:
+ *     tags:
+ *       - Orders
  *     summary: Create a new sandwich order
+ *     description: Create a new order by specifying the sandwich, user, and order date.
  *     requestBody:
  *       required: true
  *       content:
@@ -87,11 +110,14 @@ app.get('/orders', async (req: Request, res: Response) => {
  *             properties:
  *               sandwich_id:
  *                 type: integer
+ *                 example: 1
  *               user_id:
  *                 type: integer
+ *                 example: 1
  *               order_date:
  *                 type: string
  *                 format: date
+ *                 example: "2025-04-02"
  *             required:
  *               - sandwich_id
  *               - user_id
@@ -131,7 +157,10 @@ app.post('/orders', (async (req: Request, res: Response) => {
  * @swagger
  * /sandwiches:
  *   get:
+ *     tags:
+ *       - Sandwiches
  *     summary: List all sandwiches
+ *     description: Retrieve a list of all available sandwiches, including their names and bread types.
  *     responses:
  *       200:
  *         description: A list of sandwiches
@@ -144,10 +173,13 @@ app.post('/orders', (async (req: Request, res: Response) => {
  *                 properties:
  *                   id:
  *                     type: integer
+ *                     example: 1
  *                   sandwich_name:
  *                     type: string
+ *                     example: "Turkey Club"
  *                   bread_type:
  *                     type: string
+ *                     example: "Whole Wheat"
  */
 app.get('/sandwiches', async (req: Request, res: Response) => {
   try {
@@ -162,7 +194,10 @@ app.get('/sandwiches', async (req: Request, res: Response) => {
  * @swagger
  * /sandwiches:
  *   post:
+ *     tags:
+ *       - Sandwiches
  *     summary: Add a new sandwich
+ *     description: Add a new sandwich to the menu by specifying its name and bread type.
  *     requestBody:
  *       required: true
  *       content:
@@ -172,8 +207,10 @@ app.get('/sandwiches', async (req: Request, res: Response) => {
  *             properties:
  *               sandwich_name:
  *                 type: string
+ *                 example: "Ham and Cheese"
  *               bread_type:
  *                 type: string
+ *                 example: "White"
  *             required:
  *               - sandwich_name
  *               - bread_type
@@ -201,7 +238,32 @@ app.post('/sandwiches', (async (req: Request, res: Response) => {
   }
 }) as express.RequestHandler);
 
-// Route to list all vendors
+
+/**
+ * @swagger
+ * /vendors:
+ *   get:
+ *     tags:
+ *       - Vendors
+ *     summary: List all vendors
+ *     description: Retrieve a list of all vendors, including their names.
+ *     responses:
+ *       200:
+ *         description: A list of vendors
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   name:
+ *                     type: string
+ *                     example: "Vendor A"
+ */
 app.get('/vendors', async (req: Request, res: Response) => {
   try {
     const vendors = await db.all('SELECT * FROM vendors');
@@ -215,7 +277,10 @@ app.get('/vendors', async (req: Request, res: Response) => {
  * @swagger
  * /vendors:
  *   post:
+ *     tags:
+ *       - Vendors
  *     summary: Add a new vendor
+ *     description: Add a new vendor and associate it with a list of sandwiches.
  *     requestBody:
  *       required: true
  *       content:
@@ -225,10 +290,12 @@ app.get('/vendors', async (req: Request, res: Response) => {
  *             properties:
  *               name:
  *                 type: string
+ *                 example: "Jimmy's"
  *               sandwich_ids:
  *                 type: array
  *                 items:
  *                   type: integer
+ *                   example: 1
  *             required:
  *               - name
  *               - sandwich_ids
