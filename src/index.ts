@@ -259,6 +259,13 @@ app.post('/vendors', (async (req: Request, res: Response) => {
   }
 }) as express.RequestHandler);
 
+// Add a route to serve the raw OpenAPI spec
+app.get('/openapi.json', (req: Request, res: Response) => {
+  res.json(swaggerSpec);
+});
+
+console.log('OpenAPI spec available at http://localhost:3000/openapi.json');
+
 // Swagger definition
 const swaggerDefinition = {
   openapi: '3.0.0',
