@@ -1,0 +1,11 @@
+POST /orders HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+Content-Length: 123
+
+{
+  "sandwich_name": "Pesto Chicken",
+  "bread_type": "brown",
+  "user_id": 2,
+  "order_date": "2025-04-03"
+}
