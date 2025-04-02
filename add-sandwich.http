@@ -3,6 +3,6 @@ POST http://localhost:3000/sandwiches
 Content-Type: application/json
 
 {
-  "sandwich_name": "Turkey Club",
-  "bread_type": "Whole Wheat"
+  "sandwich_name": "Ham and Cheese",
+  "bread_type": "White"
 }

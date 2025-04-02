@@ -3,7 +3,7 @@ POST http://localhost:3000/orders
 Content-Type: application/json
 
 {
-  "sandwich_id": 2,
-  "user_id": 3,
-  "order_date": "2025-04-03"
+  "sandwich_id": 1,
+  "user_id": 1,
+  "order_date": "2025-04-02"
 }

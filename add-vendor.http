@@ -1,0 +1,8 @@
+### Add a new vendor
+POST http://localhost:3000/vendors
+Content-Type: application/json
+
+{
+  "name": "Vendor A",
+  "sandwich_ids": [1, 2]
+}

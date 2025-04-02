@@ -1,3 +1,2 @@
 ### List all sandwich orders
-GET /orders HTTP/1.1
-Host: localhost:3000
+GET http://localhost:3000/orders
