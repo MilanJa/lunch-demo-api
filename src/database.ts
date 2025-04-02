@@ -1,11 +1,11 @@
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
+import sqlite3 from "sqlite3";
+import { open } from "sqlite";
 
 // Update the database schema to include a new sandwiches table and modify the sandwich_orders table
 export const initializeDatabase = async () => {
   const db = await open({
-    filename: './sandwich_orders.db',
-    driver: sqlite3.Database
+    filename: "./sandwich_orders.db",
+    driver: sqlite3.Database,
   });
 
   // Create the sandwiches table
@@ -27,6 +27,26 @@ export const initializeDatabase = async () => {
     );
   `);
 
+  // Add a vendors table to the database schema
+  await db.exec(`
+        CREATE TABLE IF NOT EXISTS vendors (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL
+        );
+        `);
+
+  // Correct the vendor_sandwiches table schema by adding missing columns
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS vendor_sandwiches (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      vendor_id INTEGER NOT NULL,
+      sandwich_id INTEGER NOT NULL,
+      FOREIGN KEY (vendor_id) REFERENCES vendors (id),
+      FOREIGN KEY (sandwich_id) REFERENCES sandwiches (id)
+    );
+  `);
+
+
   // Update the sandwich_orders table to reference the users table
   await db.exec(`
     CREATE TABLE IF NOT EXISTS sandwich_orders (
@@ -45,40 +65,88 @@ export const initializeDatabase = async () => {
 // Add a function to insert demo data into the database if it is empty
 export const insertDemoData = async (db: any) => {
   // Check if the sandwiches table is empty
-  const sandwichCount = await db.get('SELECT COUNT(*) as count FROM sandwiches');
+  const sandwichCount = await db.get(
+    "SELECT COUNT(*) as count FROM sandwiches"
+  );
   if (sandwichCount.count === 0) {
-    await db.run(`INSERT INTO sandwiches (sandwich_name, bread_type) VALUES (?, ?)`, ['Turkey Club', 'Whole Wheat']);
-    await db.run(`INSERT INTO sandwiches (sandwich_name, bread_type) VALUES (?, ?)`, ['Veggie Delight', 'Multigrain']);
-    await db.run(`INSERT INTO sandwiches (sandwich_name, bread_type) VALUES (?, ?)`, ['Ham and Cheese', 'White']);
-    await db.run(`INSERT INTO sandwiches (sandwich_name, bread_type) VALUES (?, ?)`, ['Chicken Caesar', 'Ciabatta']);
-    await db.run(`INSERT INTO sandwiches (sandwich_name, bread_type) VALUES (?, ?)`, ['BLT', 'Rye']);
+    await db.run(
+      `INSERT INTO sandwiches (sandwich_name, bread_type) VALUES (?, ?)`,
+      ["Turkey Club", "Whole Wheat"]
+    );
+    await db.run(
+      `INSERT INTO sandwiches (sandwich_name, bread_type) VALUES (?, ?)`,
+      ["Veggie Delight", "Multigrain"]
+    );
+    await db.run(
+      `INSERT INTO sandwiches (sandwich_name, bread_type) VALUES (?, ?)`,
+      ["Ham and Cheese", "White"]
+    );
+    await db.run(
+      `INSERT INTO sandwiches (sandwich_name, bread_type) VALUES (?, ?)`,
+      ["Chicken Caesar", "Ciabatta"]
+    );
+    await db.run(
+      `INSERT INTO sandwiches (sandwich_name, bread_type) VALUES (?, ?)`,
+      ["BLT", "Rye"]
+    );
   }
 
   // Check if the users table is empty
-  const userCount = await db.get('SELECT COUNT(*) as count FROM users');
+  const userCount = await db.get("SELECT COUNT(*) as count FROM users");
   if (userCount.count === 0) {
-    await db.run(`INSERT INTO users (name, email, role) VALUES (?, ?, ?)`, ['John Doe', 'john.doe@visma.com', 'employee']);
-    await db.run(`INSERT INTO users (name, email, role) VALUES (?, ?, ?)`, ['Jane Smith', 'jane.smith@visma.com', 'manager']);
+    await db.run(`INSERT INTO users (name, email, role) VALUES (?, ?, ?)`, [
+      "John Doe",
+      "john.doe@visma.com",
+      "employee",
+    ]);
+    await db.run(`INSERT INTO users (name, email, role) VALUES (?, ?, ?)`, [
+      "Jane Smith",
+      "jane.smith@visma.com",
+      "manager",
+    ]);
   }
 
   // Check if the sandwich_orders table is empty
-  const orderCount = await db.get('SELECT COUNT(*) as count FROM sandwich_orders');
+  const orderCount = await db.get(
+    "SELECT COUNT(*) as count FROM sandwich_orders"
+  );
   if (orderCount.count === 0) {
-    await db.run(`INSERT INTO sandwich_orders (sandwich_id, user_id, order_date) VALUES (?, ?, ?)`, [1, 1, '2025-04-01']);
-    await db.run(`INSERT INTO sandwich_orders (sandwich_id, user_id, order_date) VALUES (?, ?, ?)`, [2, 2, '2025-04-02']);
+    await db.run(
+      `INSERT INTO sandwich_orders (sandwich_id, user_id, order_date) VALUES (?, ?, ?)`,
+      [1, 1, "2025-04-01"]
+    );
+    await db.run(
+      `INSERT INTO sandwich_orders (sandwich_id, user_id, order_date) VALUES (?, ?, ?)`,
+      [2, 2, "2025-04-02"]
+    );
   }
 
   // Check if the vendors table is empty
-  const vendorCount = await db.get('SELECT COUNT(*) as count FROM vendors');
+  const vendorCount = await db.get("SELECT COUNT(*) as count FROM vendors");
   if (vendorCount.count === 0) {
-    const vendor1 = await db.run(`INSERT INTO vendors (name) VALUES (?)`, ["Jimmy's"]);
-    const vendor2 = await db.run(`INSERT INTO vendors (name) VALUES (?)`, ['Oude Ambacht']);
+    const vendor1 = await db.run(`INSERT INTO vendors (name) VALUES (?)`, [
+      "Jimmy's",
+    ]);
+    const vendor2 = await db.run(`INSERT INTO vendors (name) VALUES (?)`, [
+      "Oude Ambacht",
+    ]);
 
     // Associate sandwiches with vendors
-    await db.run(`INSERT INTO vendor_sandwiches (vendor_id, sandwich_id) VALUES (?, ?)`, [vendor1.lastID, 1]);
-    await db.run(`INSERT INTO vendor_sandwiches (vendor_id, sandwich_id) VALUES (?, ?)`, [vendor1.lastID, 2]);
-    await db.run(`INSERT INTO vendor_sandwiches (vendor_id, sandwich_id) VALUES (?, ?)`, [vendor2.lastID, 3]);
-    await db.run(`INSERT INTO vendor_sandwiches (vendor_id, sandwich_id) VALUES (?, ?)`, [vendor2.lastID, 4]);
+    await db.run(
+      `INSERT INTO vendor_sandwiches (vendor_id, sandwich_id) VALUES (?, ?)`,
+      [vendor1.lastID, 1]
+    );
+    await db.run(
+      `INSERT INTO vendor_sandwiches (vendor_id, sandwich_id) VALUES (?, ?)`,
+      [vendor1.lastID, 2]
+    );
+    await db.run(
+      `INSERT INTO vendor_sandwiches (vendor_id, sandwich_id) VALUES (?, ?)`,
+      [vendor2.lastID, 3]
+    );
+    await db.run(
+      `INSERT INTO vendor_sandwiches (vendor_id, sandwich_id) VALUES (?, ?)`,
+      [vendor2.lastID, 4]
+    );
   }
 };
-
