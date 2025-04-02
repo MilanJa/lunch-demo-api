@@ -1,11 +1,9 @@
-POST /orders HTTP/1.1
-Host: localhost:3000
+### Add a new sandwich order
+POST http://localhost:3000/orders
 Content-Type: application/json
-Content-Length: 123
 
 {
-  "sandwich_name": "Pesto Chicken",
-  "bread_type": "brown",
-  "user_id": 2,
+  "sandwich_id": 2,
+  "user_id": 3,
   "order_date": "2025-04-03"
 }

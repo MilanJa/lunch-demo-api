@@ -1,0 +1,2 @@
+### List all sandwiches
+GET http://localhost:3000/sandwiches

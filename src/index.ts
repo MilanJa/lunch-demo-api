@@ -1,8 +1,12 @@
+import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
 import { initializeDatabase } from './database';
 
+dotenv.config();
+
+const port = process.env.PORT || 3000;
+
 const app = express();
-const port = 3000;
 
 app.use(express.json());
 
@@ -24,22 +28,58 @@ app.get('/orders', async (req: Request, res: Response) => {
   }
 });
 
-// Explicitly cast the route handler to the correct type
+// Update the add order route to name missing fields in the error
 app.post('/orders', (async (req: Request, res: Response) => {
-  const { sandwich_name, bread_type, user_id, order_date } = req.body;
+  const { sandwich_id, user_id, order_date } = req.body;
 
-  if (!sandwich_name || !bread_type || !user_id || !order_date) {
-    return res.status(400).json({ error: 'All fields are required' });
+  const missingFields = [];
+  if (!sandwich_id) missingFields.push('sandwich_id');
+  if (!user_id) missingFields.push('user_id');
+  if (!order_date) missingFields.push('order_date');
+
+  if (missingFields.length > 0) {
+    return res.status(400).json({ error: `Missing fields: ${missingFields.join(', ')}` });
   }
 
   try {
     const result = await db.run(
-      'INSERT INTO sandwich_orders (sandwich_name, bread_type, user_id, order_date) VALUES (?, ?, ?, ?)',
-      [sandwich_name, bread_type, user_id, order_date]
+      'INSERT INTO sandwich_orders (sandwich_id, user_id, order_date) VALUES (?, ?, ?)',
+      [sandwich_id, user_id, order_date]
     );
     res.status(201).json({ id: result.lastID });
   } catch (error) {
     res.status(500).json({ error: 'Failed to create order' });
+  }
+}) as express.RequestHandler);
+
+// Add routes for managing sandwiches
+
+// Route to list all sandwiches
+app.get('/sandwiches', async (req: Request, res: Response) => {
+  try {
+    const sandwiches = await db.all('SELECT * FROM sandwiches');
+    res.json(sandwiches);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch sandwiches' });
+  }
+});
+
+// Fix the type error by ensuring the route handler is properly typed
+app.post('/sandwiches', (async (req: Request, res: Response) => {
+  const { sandwich_name, bread_type } = req.body;
+
+  if (!sandwich_name || !bread_type) {
+    return res.status(400).json({ error: 'Sandwich name and bread type are required' });
+  }
+
+  try {
+    const result = await db.run(
+      'INSERT INTO sandwiches (sandwich_name, bread_type) VALUES (?, ?)',
+      [sandwich_name, bread_type]
+    );
+    res.status(201).json({ id: result.lastID });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add sandwich' });
   }
 }) as express.RequestHandler);
 
